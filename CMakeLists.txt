@@ -11,10 +11,10 @@ set(CLIENTLIB_INC src/client.h)
 # add boost
 find_package(Boost 1.53.0 REQUIRED COMPONENTS system thread)
 
-add_executable(snc_brocker ${BROCKER_SRC})
-target_link_libraries(snc_brocker ${Boost_LIBRARIES} pthread)
-target_include_directories(snc_brocker PRIVATE ${Boost_INCLUDE_DIRS})
-set_target_properties(snc_brocker PROPERTIES
+add_executable(snc_broker ${BROCKER_SRC})
+target_link_libraries(snc_broker ${Boost_LIBRARIES} pthread)
+target_include_directories(snc_broker PRIVATE ${Boost_INCLUDE_DIRS})
+set_target_properties(snc_broker PROPERTIES
         CXX_STANDARD 14
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
@@ -42,6 +42,9 @@ set_target_properties(client PROPERTIES
         CXX_EXTENSIONS NO
         )
 
-
-
+install(TARGETS client snc_client snc_broker
+        RUNTIME DESTINATION /usr/bin
+        LIBRARY DESTINATION /usr/lib
+        ARCHIVE DESTINATION /usr/lib
+        PUBLIC_HEADER DESTINATION /usr/include )
 

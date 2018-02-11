@@ -1,5 +1,7 @@
 #include "client.h"
 
+using namespace snc;
+
 void Client::set_async_receive() {
     m_socket.async_receive_from(
             boost::asio::buffer(m_inBuffer), ep, [this](const boost::system::error_code& error,
