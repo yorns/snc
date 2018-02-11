@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
 
     boost::asio::io_service io_service;
 
-    Client client(argv[1], io_service, "127.0.0.1", 12001);
+    Client client(argv[1], io_service, argv[2], 12001);
     CommandLine cmdLine(io_service);
     KeyHit keyHit;
 
@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
             client.send(Client::SendType::cl_send, nick, msg.substr(nick.length()+1));
         } } );
     client.recvHandler([&cmdLine](const std::string& nick, const std::string& msg){ cmdLine.output("message from "+nick+": "+msg);});
+    client.broadcastHandler([&cmdLine](const std::string& nick, const std::string& msg){ cmdLine.output("broadcast message from "+nick+": "+msg);});
 
     cmdLine.output("starting");
 

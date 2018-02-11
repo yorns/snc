@@ -13,6 +13,7 @@ void Client::receiveHandler(const boost::system::error_code &error, size_t bytes
         return;
     if (!error && bytes_recvd>0) {
         std::string receivedData(&m_inBuffer[0], bytes_recvd);
+        //std::cerr << "-- received: "<<receivedData<<"\n";
         if (receivedData.substr(0, 6) == "newOne" && m_newNameHandler)
             m_newNameHandler( receivedData.substr(7) );
 
@@ -21,6 +22,13 @@ void Client::receiveHandler(const boost::system::error_code &error, size_t bytes
             std::string nick = receivedData.substr(4, (end = receivedData.find_first_of(' ',4))-4);
             std::cerr << "wth end= "<<end<<std::endl;
             m_receiveHandler( nick, receivedData.substr(end+1));
+        }
+
+        if (receivedData.substr(0, 9) == "broadcast" && m_broadcastHandler) {
+            std::size_t end;
+            std::string nick = receivedData.substr(10, (end = receivedData.find_first_of(' ',10))-10);
+            std::cerr << "wth end= "<<end<<std::endl;
+            m_broadcastHandler( nick, receivedData.substr(end+1));
         }
     }
     set_async_receive();
@@ -53,6 +61,8 @@ void Client::send(Client::SendType type, const std::string &nick, const std::str
 }
 
 void Client::recvHandler(const DoubleStringCall &receiveHandler) { m_receiveHandler = receiveHandler; }
+
+void Client::broadcastHandler(const DoubleStringCall &broadcastHandler) { m_broadcastHandler = broadcastHandler; }
 
 void Client::newPartnerHandler(const StringCall &newNameHandler) { m_newNameHandler = newNameHandler; }
 

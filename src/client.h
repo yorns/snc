@@ -20,6 +20,7 @@ class Client {
     udp::endpoint m_server_endpoint;
     std::array<char, 255> m_inBuffer;
     DoubleStringCall m_receiveHandler;
+    DoubleStringCall m_broadcastHandler;
     StringCall m_newNameHandler;
     bool m_stopped;
     udp::endpoint ep;
@@ -45,6 +46,7 @@ public:
 
     void recvHandler(const DoubleStringCall& receiveHandler);
     void newPartnerHandler(const StringCall& newNameHandler);
+    void broadcastHandler(const DoubleStringCall& broadcastHandler);
 
     void stop();
 
