@@ -9,7 +9,8 @@ set(BROKER_SRC src/broker.cpp)
 set(CLIENTLIB_SRC src/client.cpp)
 set(CLIENTLIB_INC src/client.h)
 
-# in case we have a valid installation under /opt/boost, use that (ubuntu useses strange boost installation)
+# in case we have a valid installation under /opt/boost, use that one (to prefent pre-installed one
+# e.g. ubuntu useses strange boost installation)
 if(EXISTS /opt/boost/include/boost/function.hpp)
         set(BOOST_ROOT /opt/boost)
 endif()
@@ -50,7 +51,6 @@ set_target_properties(client PROPERTIES
         CXX_EXTENSIONS NO
         )
 
-# -DCMAKE_INSTALL_PREFIX=/usr
 # cmake -DCMAKE_INSTALL_PREFIX=$OECORE_TARGET_SYSROOT/usr/ ..
 install(TARGETS client snc_client snc_broker
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

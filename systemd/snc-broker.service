@@ -1,0 +1,13 @@
+[Unit]
+Description=Simple Network Communication Broker Service
+Requires=network.service
+After=network.service
+
+[Service]
+Type=simple
+ExecStart=/bin/broker
+
+Restart=on-failure
+Restart-Sec=5
+
+[Install]

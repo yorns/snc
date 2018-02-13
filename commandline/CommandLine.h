@@ -33,9 +33,9 @@ class CommandLine {
        }
        outputSimple('\n');
        m_sendFunc(cmdData);
-       cmdData = "sending: <"+cmdData+">";
+//       cmdData = "sending: <"+cmdData+">";
        m_input_data.clear();
-       output(cmdData);
+//       output(cmdData);
      }
     else {
        if (data==127) {

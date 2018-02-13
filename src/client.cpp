@@ -11,25 +11,30 @@ void Client::set_async_receive() {
             });
 }
 
-void Client::receiveHandler(const boost::system::error_code &error, size_t bytes_recvd) { if (m_stopped)
+void Client::receiveHandler(const boost::system::error_code &error, size_t bytes_recvd) {
+
+    if (m_stopped)
         return;
+
+    const size_t size_newOne { std::string("newOne").size() };
+    const size_t size_msg { std::string("msg").size() };
+    const size_t size_broadcast { std::string("broadcast").size() };
+
     if (!error && bytes_recvd>0) {
         std::string receivedData(&m_inBuffer[0], bytes_recvd);
-        //std::cerr << "-- received: "<<receivedData<<"\n";
-        if (receivedData.substr(0, 6) == "newOne" && m_newNameHandler)
-            m_newNameHandler( receivedData.substr(7) );
+//        std::cerr << "-- received: "<<receivedData<<"\n";
+        if (receivedData.substr(0, size_newOne) == "newOne" && m_newNameHandler)
+            m_newNameHandler( receivedData.substr(size_newOne+1) );
 
-        if (receivedData.substr(0, 3) == "msg" && m_receiveHandler) {
+        if (receivedData.substr(0, size_msg) == "msg" && m_receiveHandler) {
             std::size_t end;
-            std::string nick = receivedData.substr(4, (end = receivedData.find_first_of(' ',4))-4);
-            std::cerr << "wth end= "<<end<<std::endl;
+            std::string nick = receivedData.substr(4, (end = receivedData.find_first_of(' ',size_msg+1))-(size_msg+1));
             m_receiveHandler( nick, receivedData.substr(end+1));
         }
 
-        if (receivedData.substr(0, 9) == "broadcast" && m_broadcastHandler) {
+        if (receivedData.substr(0, size_broadcast) == "broadcast" && m_broadcastHandler) {
             std::size_t end;
-            std::string nick = receivedData.substr(10, (end = receivedData.find_first_of(' ',10))-10);
-            std::cerr << "wth end= "<<end<<std::endl;
+            std::string nick = receivedData.substr(size_broadcast+1, (end = receivedData.find_first_of(' ',size_broadcast+1))-(size_broadcast+1));
             m_broadcastHandler( nick, receivedData.substr(end+1));
         }
     }

@@ -50,23 +50,28 @@ private:
     void receiveHandler(const boost::system::error_code &error,
                         size_t bytes_recvd) {
 
-        if (!error && bytes_recvd > 0) {
+        if (!error) {
+            if (bytes_recvd > 0) {
 
-            // simplify with strings
-            std::string data((char *) &m_buffer[0], bytes_recvd);
+                // simplify with strings
+                std::string data((char *) &m_buffer[0], bytes_recvd);
 
-            if (data.substr(0, 8) == "register")
-                do_register(data.substr(9));
+                if (data.substr(0, 8) == "register")
+                    do_register(data.substr(9));
 
-            if (data.substr(0, 9) == "broadcast")
-                do_broadcast(data.substr(10));
+                if (data.substr(0, 9) == "broadcast")
+                    do_broadcast(data.substr(10));
 
-            if (data.substr(0, 4) == "send")
-                do_send(data.substr(5));
-        } else
-            std::cout << "error\n";
+                if (data.substr(0, 4) == "send")
+                    do_send(data.substr(5));
+            } else
+                std::cout << "error - do data received\n";
+            set_async_receive();
+        }
+        else {
+            std::cerr << "stopping broker\n";
+        }
 
-        set_async_receive();
     }
 
     void do_register(const std::string &nickname) {
@@ -130,18 +135,29 @@ public:
         set_async_receive();
     }
 
-
+    void stop() {
+        m_socket.close();
+    }
 
 };
 
 int main() {
 
-  boost::asio::io_service io_service;
+    boost::asio::io_service io_service;
+    boost::asio::signal_set signalSet(io_service, SIGINT, SIGTERM); // on kill signal, remove interfaces,
+                                                                    // to let io_service finish
 
-  Broker server(io_service);
+    Broker server(io_service);
 
-  io_service.run();
+    signalSet.async_wait([&server](const boost::system::error_code &ec, int signal) {
+        if (!ec) {
+            std::cerr << "signal id <"<<signal<<"> called\n";
+          server.stop();
+      }
+    });
 
-  return 0;
+    io_service.run();
+
+    return 0;
 }
 
