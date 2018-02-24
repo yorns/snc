@@ -55,7 +55,7 @@ private:
 
                 // simplify with strings
                 std::string data((char *) &m_buffer[0], bytes_recvd);
-
+                std::cerr << "Message received: "<<data<<std::endl;
                 if (data.substr(0, 8) == "register")
                     do_register(data.substr(9));
 
