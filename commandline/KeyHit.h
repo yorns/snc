@@ -49,7 +49,9 @@ class KeyHit {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     else
-      if (m_keyFunc) m_keyFunc(buf);
+      if (m_keyFunc) {
+          m_keyFunc(buf);
+      }
   }
   void start() {
     th = std::thread([this]() {
@@ -74,7 +76,7 @@ public:
     start();
   }
 
-  void setKeyReceiver(KeyFunc keyFunc) { m_keyFunc = keyFunc; }
+  void setKeyReceiver(const KeyFunc& keyFunc) { m_keyFunc = keyFunc; }
 
   void stop() {
     // is called from context where start was called

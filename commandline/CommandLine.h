@@ -69,11 +69,10 @@ public:
   void setSend(SendFunc sendFunc) { m_sendFunc = sendFunc; }
 
   void keyInputExternal(char key) {
-    m_service.post(std::bind(&CommandLine::handleCommandLineInput, this, key));
+    m_service.post([this, key](){handleCommandLineInput(key);});
   }
 
   void outputSimple(char data) {
-//    std::string output(&data,1);
     boost::asio::write(m_output, boost::asio::buffer(&data,1));
   }
 

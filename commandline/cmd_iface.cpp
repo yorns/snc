@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     CommandLine cmdLine(io_service);
     KeyHit keyHit;
 
-    keyHit.setKeyReceiver([&io_service,&cmdLine](const char& key){ io_service.post([&cmdLine, &key](){cmdLine.keyInputExternal(key); });});
+    keyHit.setKeyReceiver([&cmdLine](const char& key){ cmdLine.keyInputExternal(key);});
     cmdLine.setStop([&keyHit, &client](){ keyHit.stop(); client.stop(); });
     cmdLine.setSend([&client](const std::string& msg){
         std::string nick = msg.substr(0, msg.find_first_of(' '));

@@ -87,14 +87,17 @@ private:
 
         std::string ownName("newone " + nickname);
 
-        if (std::find_if(clientList.begin(), clientList.end(),
-                         [&nickname](const ClientSet& clientSet){ return clientSet.m_nickname == nickname;}) != clientList.end()) {
+        auto knownClient = std::find_if(clientList.begin(), clientList.end(),
+                         [&nickname](const ClientSet& clientSet){ return clientSet.m_nickname == nickname;});
+        if (knownClient != clientList.end()) {
 
             for (auto client : clientList) {
                 std::string msg("newone " + client.m_nickname);
                 m_socket.send_to(boost::asio::buffer(msg), m_sender_endpoint);
             }
 
+            knownClient->m_clientEndpoint = m_sender_endpoint;
+            knownClient->m_online = true;
         }
         else {
             // informing all other clients about the new one and send available clients to new one
