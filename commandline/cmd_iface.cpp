@@ -10,8 +10,8 @@ int main(int argc, char* argv[]) {
     CommandLine cmdLine(io_service);
     KeyHit keyHit;
 
-    keyHit.setKeyReceiver(std::bind(&CommandLine::keyInputExternal, &cmdLine, std::placeholders::_1));
-    cmdLine.setStop([&keyHit, &client](){keyHit.stop(); client.stop(); });
+    keyHit.setKeyReceiver([&io_service,&cmdLine](const char& key){ io_service.post([&cmdLine, &key](){cmdLine.keyInputExternal(key); });});
+    cmdLine.setStop([&keyHit, &client](){ keyHit.stop(); client.stop(); });
     cmdLine.setSend([&client](const std::string& msg){
         std::string nick = msg.substr(0, msg.find_first_of(' '));
         if (nick == "broadcast") {

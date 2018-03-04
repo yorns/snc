@@ -77,7 +77,7 @@ public:
   void setKeyReceiver(KeyFunc keyFunc) { m_keyFunc = keyFunc; }
 
   void stop() {
-    // is called from another context
+    // is called from context where start was called
     m_stop = true;
     if (th.joinable())
       th.join();

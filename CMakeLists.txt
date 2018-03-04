@@ -4,7 +4,7 @@ project(snc VERSION 1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
-set(BROKER_SRC src/broker.cpp)
+set(BROKER_SRC src/broker.cpp src/SystemdIface.cpp)
 
 set(CLIENTLIB_SRC src/client.cpp)
 set(CLIENTLIB_INC src/client.h)
@@ -15,12 +15,15 @@ if(EXISTS /opt/boost/include/boost/function.hpp)
         set(BOOST_ROOT /opt/boost)
 endif()
 
+#there is no sane way to get systemd
+
 # add boost
 find_package(Boost 1.53.0 REQUIRED COMPONENTS system thread)
 
 add_executable(snc_broker ${BROKER_SRC})
-target_link_libraries(snc_broker ${Boost_LIBRARIES} pthread)
-target_include_directories(snc_broker PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(snc_broker ${systemd_lib} ${Boost_LIBRARIES} pthread)
+target_include_directories(snc_broker PRIVATE ${Boost_INCLUDE_DIRS} ${systemd_inc})
+target_compile_definitions(snc_broker PRIVATE ${defines})
 set_target_properties(snc_broker PROPERTIES
         CXX_STANDARD 14
         CXX_STANDARD_REQUIRED YES

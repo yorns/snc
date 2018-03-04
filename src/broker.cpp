@@ -2,6 +2,11 @@
 #include <array>
 
 #include <boost/asio.hpp>
+#include <boost/asio/system_timer.hpp>
+
+#include <chrono>
+
+#include "SystemdIface.h"
 
 using boost::asio::ip::udp;
 
@@ -22,6 +27,9 @@ private:
     std::array<uint8_t, 255> m_buffer;
     udp::endpoint m_sender_endpoint;
     std::vector<ClientSet> clientList;
+    SystemdIface systemdIface;
+    boost::asio::system_timer watchdogTimer;
+    std::chrono::microseconds watchdogDuration;
 
     void set_async_receive() {
         m_socket.async_receive_from(
@@ -97,7 +105,7 @@ private:
             }
 
             // keep client in our database
-            clientList.push_back(ClientSet(nickname, m_sender_endpoint));
+            clientList.emplace_back(ClientSet(nickname, m_sender_endpoint));
         }
     }
 
@@ -124,19 +132,34 @@ private:
             std::cout << "no client found for nick <" << toNickName << ">\n";
         else
             m_socket.send_to(boost::asio::buffer(message), ep);
+    }
 
+    void sendWatchdogTrigger() {
+        systemdIface.notifyWatchdog();
+
+        watchdogTimer.expires_from_now(watchdogDuration);
+        watchdogTimer.async_wait([this](const boost::system::error_code& error ) {
+            if (!error)
+                sendWatchdogTrigger();
+        });
     }
 
 public:
     Broker(boost::asio::io_service &service, uint16_t port = 12001)
-            : m_io_service(service), m_socket(m_io_service, udp::endpoint(udp::v4() /* any UDP */, port)) {
+            : m_io_service(service), m_socket(m_io_service, udp::endpoint(udp::v4() /* any UDP */, port)),
+    watchdogTimer(service){
+
+        watchdogDuration = std::chrono::microseconds(systemdIface.getInterval()/2);
+        sendWatchdogTrigger();
 
         // now, we need to listen to any IP, and react on incomming data
         set_async_receive();
+        systemdIface.notifyReady();
     }
 
     void stop() {
         m_socket.close();
+        watchdogTimer.cancel();
     }
 
 };

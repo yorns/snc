@@ -52,9 +52,7 @@ class CommandLine {
            str << "\nStrange sign <" << (int) data << "> received";
            output(str.str());
          }
-
        }
-
      }
   }
 

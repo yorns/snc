@@ -4,11 +4,20 @@ Requires=systemd-networkd.service
 After=systemd-networkd.service
 
 [Service]
-Type=simple
+Type=notify
 ExecStart=/usr/bin/snc_broker
 
+# what to do on unexpected application failure stops
 Restart=on-failure
 RestartSec=5
+
+# watchdog information
+WatchdogSec=20s
+
+# what to do on multiple restart
+StartLimitInterval=5min
+StartLimitBurst=4
+StartLimitAction=reboot-force
 
 [Install]
 WantedBy=multi-user.target
