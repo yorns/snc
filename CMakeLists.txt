@@ -15,7 +15,11 @@ if(EXISTS /opt/boost/include/boost/function.hpp)
         set(BOOST_ROOT /opt/boost)
 endif()
 
-#there is no sane way to get systemd
+#EXTRA_OECMAKE = "-DWITH_SYSTEMD=1"
+if(WITH_SYSTEMD)
+  message(STATUS "compiling with systemd")
+  set(defines WITH_SYSTEMD)
+endif()
 
 # add boost
 find_package(Boost 1.53.0 REQUIRED COMPONENTS system thread)
