@@ -1,10 +1,9 @@
 #include <iostream>
 #include <array>
+#include <chrono>
 
 #include <boost/asio.hpp>
 #include <boost/asio/system_timer.hpp>
-
-#include <chrono>
 
 #include "SystemdIface.h"
 
@@ -155,7 +154,7 @@ public:
         watchdogDuration = std::chrono::microseconds(systemdIface.getInterval()/2);
         sendWatchdogTrigger();
 
-        // now, we need to listen to any IP, and react on incomming data
+        // now, we need to listen to any IP, and react on incoming data
         set_async_receive();
         systemdIface.notifyReady();
     }

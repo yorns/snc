@@ -41,15 +41,6 @@ void Client::receiveHandler(const boost::system::error_code &error, size_t bytes
     set_async_receive();
 }
 
-Client::Client(const std::string &name, boost::asio::io_service &service, const std::string &serverIp,
-                   uint16_t port) :
-        m_service(service), m_socket(m_service, udp::endpoint(udp::v4(), 0 /* take random port */)),
-        m_server_endpoint(boost::asio::ip::address::from_string(serverIp), port),
-        m_stopped(false)
-{
-    send(Client::SendType::cl_register, name);
-    set_async_receive();
-}
 
 void Client::send(Client::SendType type, const std::string &nick, const std::string &data) {
     if (!m_stopped) {
