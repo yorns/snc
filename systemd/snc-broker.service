@@ -4,7 +4,7 @@ Requires=systemd-networkd.service
 After=systemd-networkd.service
 
 [Service]
-Type=notify
+Type=simple
 ExecStart=/usr/bin/snc_broker
 
 # what to do on unexpected application failure stops
