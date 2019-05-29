@@ -3,9 +3,10 @@
 #include <chrono>
 
 #include <boost/asio.hpp>
-#include <boost/asio/system_timer.hpp>
 
 #include "SystemdIface.h"
+
+#define dbg std::cerr
 
 using boost::asio::ip::udp;
 
@@ -23,20 +24,16 @@ class Broker {
 private:
     boost::asio::io_service &m_io_service;
     udp::socket m_socket;
-    std::array<uint8_t, 255> m_buffer;
+    std::array<char, 255> m_buffer;
     udp::endpoint m_sender_endpoint;
     std::vector<ClientSet> clientList;
     SystemdIface systemdIface;
     boost::asio::system_timer watchdogTimer;
     std::chrono::microseconds watchdogDuration;
 
-    void set_async_receive() {
-        m_socket.async_receive_from(
-                boost::asio::buffer(m_buffer), m_sender_endpoint,
-                [this](const boost::system::error_code &error, size_t bytes_recvd) {
-                    receiveHandler(error, bytes_recvd);
-                });
-    }
+    std::string m_cmdRegister{"register"};
+    std::string m_cmdSend{"send"};
+    std::string m_cmdBroadcast{"broadcast"};
 
     std::string getNickname(const udp::endpoint &sender) {
         std::string nickname("unknown");
@@ -54,31 +51,42 @@ private:
         return ep;
     }
 
+    bool startMessageWith(const std::string &inString, const std::string &command) {
+        return inString.length() > command.size() + 2 /* space + at least one char for next info */ &&
+               inString.substr(0, command.length()) == command;
+    }
+
+    void set_async_receive() {
+        m_socket.async_receive_from(
+                boost::asio::buffer(m_buffer), m_sender_endpoint,
+                [this](const boost::system::error_code &error, size_t bytes_recvd) {
+                    receiveHandler(error, bytes_recvd);
+                });
+    }
+
     void receiveHandler(const boost::system::error_code &error,
                         size_t bytes_recvd) {
 
-        if (!error) {
-            if (bytes_recvd > 0) {
-
-                // simplify with strings
-                std::string data((char *) &m_buffer[0], bytes_recvd);
-                std::cerr << "Message received: "<<data<<std::endl;
-                if (data.substr(0, 8) == "register")
-                    do_register(data.substr(9));
-
-                if (data.substr(0, 9) == "broadcast")
-                    do_broadcast(data.substr(10));
-
-                if (data.substr(0, 4) == "send")
-                    do_send(data.substr(5));
-            } else
-                std::cout << "error - do data received\n";
-            set_async_receive();
-        }
-        else {
-            std::cerr << "stopping broker\n";
+        if (error) {
+            dbg << "stopping broker\n";
+            return;
         }
 
+        if (bytes_recvd > 0) {
+            std::string data(m_buffer.data(), bytes_recvd);
+            dbg << "Message received: " << data << std::endl;
+
+            if (startMessageWith(data, m_cmdRegister))
+                do_register(data.substr(m_cmdRegister.length() + 1));
+
+            if (startMessageWith(data, m_cmdBroadcast))
+                do_broadcast(data.substr(m_cmdBroadcast.length() + 1));
+
+            if (startMessageWith(data, m_cmdSend))
+                do_send(data.substr(m_cmdSend.length() + 1));
+        } else
+            std::cout << "error - no usable data received\n";
+        set_async_receive();
     }
 
     void do_register(const std::string &nickname) {

@@ -6,6 +6,11 @@ int main(int argc, char* argv[]) {
 
     boost::asio::io_service io_service;
 
+    if (argc != 3) {
+        std::cerr << "usage: "<<argv[0]<<" <name> <ip>\n";
+        return -1;
+    }
+
     snc::Client client(argv[1], io_service, argv[2], 12001);
     CommandLine cmdLine(io_service);
     KeyHit keyHit;
