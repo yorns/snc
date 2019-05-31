@@ -4,7 +4,8 @@
 
 #include <boost/asio.hpp>
 
-#include "SystemdIface.h"
+#include "../system/SystemdIface.h"
+#include "commandNames.h"
 
 #define dbg std::cerr
 
@@ -31,9 +32,6 @@ private:
     boost::asio::system_timer watchdogTimer;
     std::chrono::microseconds watchdogDuration;
 
-    std::string m_cmdRegister{"register"};
-    std::string m_cmdSend{"send"};
-    std::string m_cmdBroadcast{"broadcast"};
 
     std::string getNickname(const udp::endpoint &sender) {
         std::string nickname("unknown");
@@ -76,14 +74,14 @@ private:
             std::string data(m_buffer.data(), bytes_recvd);
             dbg << "Message received: " << data << std::endl;
 
-            if (startMessageWith(data, m_cmdRegister))
-                do_register(data.substr(m_cmdRegister.length() + 1));
+            if (startMessageWith(data, CommandName::cmdRegister))
+                do_register(data.substr(CommandName::cmdRegister.length() + 1));
 
-            if (startMessageWith(data, m_cmdBroadcast))
-                do_broadcast(data.substr(m_cmdBroadcast.length() + 1));
+            if (startMessageWith(data, CommandName::cmdBroadcast))
+                do_broadcast(data.substr(CommandName::cmdBroadcast.length() + 1));
 
-            if (startMessageWith(data, m_cmdSend))
-                do_send(data.substr(m_cmdSend.length() + 1));
+            if (startMessageWith(data, CommandName::cmdSend))
+                do_send(data.substr(CommandName::cmdSend.length() + 1));
         } else
             std::cout << "error - no usable data received\n";
         set_async_receive();
@@ -92,14 +90,14 @@ private:
     void do_register(const std::string &nickname) {
         std::cout << "new client registered <" << nickname << ">\n";
 
-        std::string ownName("newone " + nickname);
+        std::string ownName(CommandName::cmdNewone + " " + nickname);
 
         auto knownClient = std::find_if(clientList.begin(), clientList.end(),
                          [&nickname](const ClientSet& clientSet){ return clientSet.m_nickname == nickname;});
         if (knownClient != clientList.end()) {
 
             for (auto client : clientList) {
-                std::string msg("newone " + client.m_nickname);
+                std::string msg(CommandName::cmdNewone + " " + client.m_nickname);
                 m_socket.send_to(boost::asio::buffer(msg), m_sender_endpoint);
             }
 
@@ -109,7 +107,7 @@ private:
         else {
             // informing all other clients about the new one and send available clients to new one
             for (auto client : clientList) {
-                std::string msg("newone " + client.m_nickname);
+                std::string msg(CommandName::cmdNewone + " " + client.m_nickname);
                 m_socket.send_to(boost::asio::buffer(msg), m_sender_endpoint);
                 m_socket.send_to(boost::asio::buffer(ownName), client.m_clientEndpoint);
             }
@@ -122,7 +120,7 @@ private:
     void do_broadcast(const std::string &message) {
         std::cout << "new broadcast message <" << message << ">\n";
 
-        std::string msg("broadcast " + getNickname(m_sender_endpoint) + " " + message);
+        std::string msg(CommandName::cmdBroadcast + " " + getNickname(m_sender_endpoint) + " " + message);
 
         std::for_each(std::begin(clientList), std::end(clientList),
                       [&](ClientSet &cs) {
@@ -134,7 +132,7 @@ private:
     void do_send(const std::string &remainder) {
         std::string::size_type nickEnd = remainder.find_first_of(' ');
         std::string toNickName = remainder.substr(0, nickEnd);
-        std::string message = "msg " + getNickname(m_sender_endpoint) + " " + remainder.substr(nickEnd + 1);
+        std::string message = CommandName::cmdMsg + " " + getNickname(m_sender_endpoint) + " " + remainder.substr(nickEnd + 1);
 
         udp::endpoint ep = getEndpoint(toNickName);
 

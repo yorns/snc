@@ -6,12 +6,18 @@ int main(int argc, char* argv[]) {
 
     boost::asio::io_service io_service;
 
-    if (argc != 3) {
-        std::cerr << "usage: "<<argv[0]<<" <name> <ip>\n";
+    if (argc != 3 && argc != 2) {
+        std::cerr << "usage: "<<argv[0]<<" <name> [ip]\n";
         return -1;
     }
 
-    snc::Client client(argv[1], io_service, argv[2], 12001);
+    std::string ip = "127.0.0.1";
+    std::string my_nick = argv[1];
+
+    if (argc == 3)
+        ip = argv[2];
+
+    snc::Client client(my_nick, io_service, ip, 12001);
     CommandLine cmdLine(io_service);
     KeyHit keyHit;
 
@@ -27,6 +33,7 @@ int main(int argc, char* argv[]) {
         } } );
     client.recvHandler([&cmdLine](const std::string& nick, const std::string& msg){ cmdLine.output("message from "+nick+": "+msg);});
     client.broadcastHandler([&cmdLine](const std::string& nick, const std::string& msg){ cmdLine.output("broadcast message from "+nick+": "+msg);});
+    client.newPartnerHandler([&cmdLine, my_nick](const std::string& nick){ if(nick != my_nick) cmdLine.output("new client available: "+nick);});
 
     cmdLine.output("starting");
 

@@ -4,9 +4,9 @@ project(snc VERSION 1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
-set(BROKER_SRC src/broker.cpp src/SystemdIface.cpp)
+set(BROKER_SRC src/broker.cpp system/SystemdIface.cpp src/commandNames.cpp)
 
-set(CLIENTLIB_SRC src/client.cpp)
+set(CLIENTLIB_SRC src/client.cpp src/commandNames.cpp)
 set(CLIENTLIB_INC src/client.h)
 
 # in case we have a valid installation under /opt/boost, use that one (to prefent pre-installed one

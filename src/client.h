@@ -2,18 +2,17 @@
 #define SNC_CLIENT_H
 
 #include <iostream>
-//#include <chrono>
 #include <thread>
 #include <array>
 #include <functional>
 #include <boost/asio.hpp>
 
-typedef std::function<void(const std::string&)> StringCall;
-typedef std::function<void(const std::string&, const std::string& )> DoubleStringCall;
-
 using boost::asio::ip::udp;
 
 namespace snc {
+
+    typedef std::function<void(const std::string&)> StringCall;
+    typedef std::function<void(const std::string&, const std::string& )> DoubleStringCall;
 
     class Client {
 
@@ -31,6 +30,8 @@ namespace snc {
 
         void receiveHandler(const boost::system::error_code &error,
                             size_t bytes_recvd);
+
+        std::string getNick(const std::string line, const std::string& prefix);
 
     public:
         Client() = delete;

@@ -1,4 +1,5 @@
 #include "client.h"
+#include "commandNames.h"
 
 using namespace snc;
 
@@ -11,31 +12,29 @@ void Client::set_async_receive() {
             });
 }
 
+std::string Client::getNick(const std::string line, const std::string &prefix) {
+    return line.substr(prefix.size()+1, (line.find_first_of(' ', prefix.size()+1)) - (prefix.size()+1));
+}
+
 void Client::receiveHandler(const boost::system::error_code &error, size_t bytes_recvd) {
 
     if (m_stopped)
         return;
 
-    const size_t size_newOne { std::string("newOne").size() };
-    const size_t size_msg { std::string("msg").size() };
-    const size_t size_broadcast { std::string("broadcast").size() };
-
     if (!error && bytes_recvd>0) {
         std::string receivedData(&m_inBuffer[0], bytes_recvd);
-//        std::cerr << "-- received: "<<receivedData<<"\n";
-        if (receivedData.substr(0, size_newOne) == "newOne" && m_newNameHandler)
-            m_newNameHandler( receivedData.substr(size_newOne+1) );
 
-        if (receivedData.substr(0, size_msg) == "msg" && m_receiveHandler) {
-            std::size_t end;
-            std::string nick = receivedData.substr(4, (end = receivedData.find_first_of(' ',size_msg+1))-(size_msg+1));
-            m_receiveHandler( nick, receivedData.substr(end+1));
+        if (receivedData.substr(0, CommandName::cmdNewone.size()) == CommandName::cmdNewone && m_newNameHandler)
+            m_newNameHandler( receivedData.substr(CommandName::cmdNewone.size()+1) );
+
+        if (receivedData.substr(0, CommandName::cmdMsg.size()) == CommandName::cmdMsg && m_receiveHandler) {
+            std::string nick = getNick(receivedData, CommandName::cmdMsg);
+            m_receiveHandler( nick, receivedData.substr(CommandName::cmdMsg.size() + nick.size() + 2 /* separators */));
         }
 
-        if (receivedData.substr(0, size_broadcast) == "broadcast" && m_broadcastHandler) {
-            std::size_t end;
-            std::string nick = receivedData.substr(size_broadcast+1, (end = receivedData.find_first_of(' ',size_broadcast+1))-(size_broadcast+1));
-            m_broadcastHandler( nick, receivedData.substr(end+1));
+        if (receivedData.substr(0, CommandName::cmdBroadcast.size()) == CommandName::cmdBroadcast && m_broadcastHandler) {
+            std::string nick = getNick(receivedData, CommandName::cmdBroadcast);
+            m_broadcastHandler( nick, receivedData.substr(CommandName::cmdBroadcast.size() + nick.size() + 2 /* separators */));
         }
     }
     set_async_receive();
@@ -46,13 +45,13 @@ void Client::send(Client::SendType type, const std::string &nick, const std::str
     if (!m_stopped) {
         switch (type) {
             case Client::SendType::cl_send:
-            m_socket.send_to(boost::asio::buffer("send " + nick + " " + data), m_server_endpoint);
+            m_socket.send_to(boost::asio::buffer(CommandName::cmdSend + " " + nick + " " + data), m_server_endpoint);
                 break;
             case Client::SendType::cl_register:
-                m_socket.send_to(boost::asio::buffer("register " + nick ), m_server_endpoint);
+                m_socket.send_to(boost::asio::buffer(CommandName::cmdRegister + " " + nick), m_server_endpoint);
                 break;
             case Client::SendType::cl_broadcast:
-                m_socket.send_to(boost::asio::buffer("broadcast " + data), m_server_endpoint);
+                m_socket.send_to(boost::asio::buffer(CommandName::cmdBroadcast + " " + data), m_server_endpoint);
                 break;
         }
     }
@@ -67,3 +66,4 @@ void Client::newPartnerHandler(const StringCall &newNameHandler) { m_newNameHand
 void Client::stop() { m_stopped = true; m_socket.close(); }
 
 Client::~Client() { std::cout << "Client destructor\n"; }
+
