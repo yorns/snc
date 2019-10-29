@@ -30,7 +30,7 @@ private:
     udp::endpoint m_sender_endpoint;
     std::vector<ClientSet> clientList;
     SystemdIface systemdIface;
-    boost::asio::steady_timer watchdogTimer;
+    boost::asio::deadline_timer watchdogTimer;
     std::chrono::microseconds watchdogDuration;
 
 
