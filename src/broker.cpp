@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include <boost/asio.hpp>
+#include <boost/asio/system_timer.hpp>
 
 #include "../system/SystemdIface.h"
 #include "commandNames.h"
@@ -29,7 +30,7 @@ private:
     udp::endpoint m_sender_endpoint;
     std::vector<ClientSet> clientList;
     SystemdIface systemdIface;
-    boost::asio::system_timer watchdogTimer;
+    boost::asio::steady_timer watchdogTimer;
     std::chrono::microseconds watchdogDuration;
 
 
