@@ -31,8 +31,8 @@ private:
     std::vector<ClientSet> clientList;
     SystemdIface systemdIface;
     boost::asio::deadline_timer watchdogTimer;
-    std::chrono::microseconds watchdogDuration;
-
+//    std::chrono::microseconds watchdogDuration;
+    boost::posix_time::seconds watchdogDuration {5};
 
     std::string getNickname(const udp::endpoint &sender) {
         std::string nickname("unknown");
@@ -158,7 +158,11 @@ public:
             : m_io_service(service), m_socket(m_io_service, udp::endpoint(udp::v4() /* any UDP */, port)),
     watchdogTimer(service){
 
-        watchdogDuration = std::chrono::microseconds(systemdIface.getInterval()/2);
+        //watchdogDuration = std::chrono::microseconds(systemdIface.getInterval()/2);
+
+        // old boost 1.64 without chrono
+        uint64_t intervalInSec = systemdIface.getInterval()/(1000*1000);
+        watchdogDuration = boost::posix_time::seconds(intervalInSec/2);
         sendWatchdogTrigger();
 
         // now, we need to listen to any IP, and react on incoming data
