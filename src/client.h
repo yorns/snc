@@ -37,14 +37,7 @@ namespace snc {
         Client() = delete;
 
         Client(const std::string &name, boost::asio::io_service &service, const std::string &serverIp,
-                       uint16_t port) :
-                m_service(service), m_socket(m_service, udp::endpoint(udp::v4(), 0 /* take random port */)),
-                m_server_endpoint(boost::asio::ip::address::from_string(serverIp), port),
-                m_stopped(false)
-        {
-            send(Client::SendType::cl_register, name);
-            set_async_receive();
-        }
+                       uint16_t port);
 
         ~Client();
 

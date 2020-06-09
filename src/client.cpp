@@ -16,6 +16,15 @@ std::string Client::getNick(const std::string line, const std::string &prefix) {
     return line.substr(prefix.size()+1, (line.find_first_of(' ', prefix.size()+1)) - (prefix.size()+1));
 }
 
+Client::Client(const std::string &name, boost::asio::io_service &service, const std::string &serverIp, uint16_t port) :
+    m_service(service), m_socket(m_service, udp::endpoint(udp::v4(), 0 /* take random port */)),
+    m_server_endpoint(boost::asio::ip::address::from_string(serverIp), port),
+    m_stopped(false)
+{
+    send(Client::SendType::cl_register, name);
+    set_async_receive();
+}
+
 void Client::receiveHandler(const boost::system::error_code &error, size_t bytes_recvd) {
 
     if (m_stopped)
