@@ -34,7 +34,7 @@ SET(SNC_VERSION ${SNC_VERSION_MAJOR}.${SNC_VERSION_MINOR}.${SNC_VERSION_PATCH})
 
 add_executable(snc_broker ${BROKER_SRC})
 target_link_libraries(snc_broker ${systemd_lib} ${Boost_LIBRARIES} pthread)
-target_include_directories(snc_broker PRIVATE ${Boost_INCLUDE_DIRS} ${systemd_inc})
+target_include_directories(snc_broker PRIVATE ${Boost_INCLUDE_DIRS} ${systemd_inc} ${CMAKE_SOURCE_DIR}/src)
 target_compile_definitions(snc_broker PRIVATE ${defines})
 #target
 

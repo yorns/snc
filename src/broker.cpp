@@ -7,6 +7,7 @@
 
 #include "../system/SystemdIface.h"
 #include "commandNames.h"
+#include "config.h"
 
 #define dbg std::cerr
 
@@ -26,7 +27,7 @@ class Broker {
 private:
     boost::asio::io_service &m_io_service;
     udp::socket m_socket;
-    std::array<char, 255> m_buffer;
+    std::array<char, snc::config::maxMsgLength> m_buffer;
     udp::endpoint m_sender_endpoint;
     std::vector<ClientSet> clientList;
     SystemdIface systemdIface;

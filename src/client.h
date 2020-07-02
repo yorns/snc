@@ -6,6 +6,7 @@
 #include <array>
 #include <functional>
 #include <boost/asio.hpp>
+#include "config.h"
 
 using boost::asio::ip::udp;
 
@@ -19,7 +20,7 @@ namespace snc {
         boost::asio::io_service &m_service;
         udp::socket m_socket;
         udp::endpoint m_server_endpoint;
-        std::array<char, 255> m_inBuffer;
+        std::array<char, snc::config::maxMsgLength> m_inBuffer;
         DoubleStringCall m_receiveHandler;
         DoubleStringCall m_broadcastHandler;
         StringCall m_newNameHandler;
