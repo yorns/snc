@@ -46,7 +46,7 @@ add_library(snc_client SHARED ${CLIENTLIB_SRC})
 target_link_libraries(snc_client ${Boost_LIBRARIES} pthread)
 target_include_directories(snc_client PRIVATE ${Boost_INCLUDE_DIRS}
         PUBLIC ${CMAKE_SOURCE_DIR}/src)
-set_target_properties(snc_client PROPERTIES PUBLIC_HEADER src/client.h src/config.h)
+set_target_properties(snc_client PROPERTIES PUBLIC_HEADER src/client.h )
 set_target_properties(snc_client PROPERTIES
 	VERSION ${SNC_VERSION}
 	SOVERSION ${SNC_VERSION_MAJOR})
