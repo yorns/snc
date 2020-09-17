@@ -4,6 +4,10 @@ project(snc VERSION 1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
+if (BOOST_DIR)
+  set(BOOST_ROOT ${BOOST_DIR})
+endif (BOOST_DIR)
+
 set(BROKER_SRC src/broker.cpp system/SystemdIface.cpp src/commandNames.cpp)
 
 set(CLIENTLIB_SRC src/client.cpp src/commandNames.cpp)
@@ -57,8 +61,12 @@ add_executable(sender commandline/genericSender.cpp)
 target_link_libraries(sender ${Boost_LIBRARIES} snc_client pthread)
 target_include_directories(sender PRIVATE ${Boost_INCLUDE_DIRS})
 
+add_executable(sender2 commandline/genericSender2.cpp)
+target_link_libraries(sender2 ${Boost_LIBRARIES} snc_client pthread)
+target_include_directories(sender2 PRIVATE ${Boost_INCLUDE_DIRS})
+
 # cmake -DCMAKE_INSTALL_PREFIX=$OECORE_TARGET_SYSROOT/usr/ ..
-install(TARGETS client snc_client snc_broker sender
+install(TARGETS client snc_client snc_broker sender sender2
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
