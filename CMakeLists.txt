@@ -34,7 +34,7 @@ SET(SNC_VERSION_MAJOR 1)
 SET(SNC_VERSION_MINOR 0)
 SET(SNC_VERSION_PATCH 0)
 SET(SNC_VERSION ${SNC_VERSION_MAJOR}.${SNC_VERSION_MINOR}.${SNC_VERSION_PATCH})
-
+SET(SNC_PUBLIC_HEADER src/config.h src/client.h)
 
 add_executable(snc_broker ${BROKER_SRC})
 target_link_libraries(snc_broker ${systemd_lib} ${Boost_LIBRARIES} pthread)
@@ -46,7 +46,10 @@ add_library(snc_client SHARED ${CLIENTLIB_SRC})
 target_link_libraries(snc_client ${Boost_LIBRARIES} pthread)
 target_include_directories(snc_client PRIVATE ${Boost_INCLUDE_DIRS}
         PUBLIC ${CMAKE_SOURCE_DIR}/src)
-set_target_properties(snc_client PROPERTIES PUBLIC_HEADER src/client.h )
+# double quotes are essential, but its kind of odd: value for a property can only be a single value,
+# however, you can add multiple properties in one line
+set_target_properties(snc_client PROPERTIES PUBLIC_HEADER "${SNC_PUBLIC_HEADER}" )
+
 set_target_properties(snc_client PROPERTIES
 	VERSION ${SNC_VERSION}
 	SOVERSION ${SNC_VERSION_MAJOR})
