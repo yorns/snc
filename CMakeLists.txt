@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
-include(GNUInstallDirs)
 
 project(snc VERSION 1.0 LANGUAGES CXX)
+
+include(GNUInstallDirs)
 
 # in case we have a valid installation under /opt/boost, use that one (to prefent pre-installed one
 # e.g. ubuntu useses strange boost installation)
