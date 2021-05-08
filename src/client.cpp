@@ -1,4 +1,4 @@
-#include "client.h"
+#include "snc/client.h"
 #include "commandNames.h"
 
 using namespace snc;

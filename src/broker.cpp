@@ -7,7 +7,7 @@
 
 #include "../system/SystemdIface.h"
 #include "commandNames.h"
-#include "config.h"
+#include "snc/config.h"
 
 #define dbg std::cerr
 

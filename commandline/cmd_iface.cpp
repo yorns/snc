@@ -1,4 +1,4 @@
-#include "client.h"
+#include "snc/client.h"
 #include "CommandLine.h"
 #include "KeyHit.h"
 

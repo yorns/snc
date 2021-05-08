@@ -21,26 +21,32 @@ find_package(Boost 1.70.0 REQUIRED CONFIG)
 add_executable(snc_broker)
 add_library(snc_client)
 
+add_subdirectory(snc)
+install(FILES snc/config.h snc/client.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/snc)
+
 add_subdirectory(src)
 add_subdirectory(system)
 
 target_link_libraries(snc_broker PUBLIC Boost::headers Threads::Threads)
+target_include_directories(snc_broker
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+target_compile_features(snc_broker PUBLIC cxx_std_14)
 #EXTRA_OECMAKE = "-DWITH_SYSTEMD=1"
 if(WITH_SYSTEMD)
   message(STATUS "compiling with systemd")
   target_link_libraries(snc_broker PUBLIC ${systemd_lib}) # <- Where is this set?
   target_compile_definitions(snc_broker PUBLIC WITH_SYSTEMD)
 endif()
-target_compile_features(snc_broker PUBLIC cxx_std_14)
 #target
 
 target_link_libraries(snc_client PUBLIC Boost::headers Threads::Threads)
 target_include_directories(snc_client
     PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include>)
 target_compile_features(snc_client PUBLIC cxx_std_14)
-install(FILES src/config.h src/client.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/snc)
 add_library(snc::snc_client ALIAS snc_client)
 
 
